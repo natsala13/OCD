@@ -50,7 +50,7 @@ parser.add_argument(
     help='training data path, default <''/data/tiny_nerf_data.npz''>')
 parser.add_argument(
     '-pdts', '--data_test_path', type=str, default = '/data',
-    help='test data path, default <'/data'>')
+    help="test data path, default <'/data'>")
 parser.add_argument(
     '-dt', '--datatype', type=str, default = 'tinynerf',
     help='datatype - tinynerf or not, default <tinynerf>')
@@ -79,14 +79,14 @@ tb_logger = tb.SummaryWriter(log_dir=tb_path)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 lr = args.learning_rate # learning rate for the diffusion model & scale estimation model
 
-diffusion_model = Model(config=config).cuda()
+diffusion_model = Model(config=config).to(device)
 loss_fn = torch.nn.MSELoss()
-scale_model = Model_Scale(config=config).cuda()
+scale_model = Model_Scale(config=config).to(device)
 if args.resume_training:
     diffusion_model.load_state_dict(torch.load(args.diffusion_model_path))
     scale_model.load_state_dict(torch.load(args.scale_model_path))
 train_loader, test_loader, model = wrapper_dataset(config, args, device)
-model.load_state_dict(torch.load(module_path))
+model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))
 model = model.to(device)
 if config.training.loss == 'mse':
     opt_error_loss = torch.nn.MSELoss()
