@@ -7,7 +7,7 @@ from torchvision.transforms import ToTensor
 from copy import deepcopy
 import os
 import numpy as np
-from diffusion_ocd import Model, Model_Scale
+from diffusion_ocd import DiffusionModel, Model_Scale
 from utils_OCD import overfitting_batch_wrapper, noising, generalized_steps, ConfigWrapper
 import torch.utils.tensorboard as tb
 from train import train, vgg_encode
@@ -77,13 +77,15 @@ tb_logger = tb.SummaryWriter(log_dir=tb_path)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 lr = args.learning_rate  # learning rate for the diffusion model & scale estimation model
 
-diffusion_model = Model(config=config).to(device)
+diffusion_model = DiffusionModel(config=config).to(device)
 loss_fn = torch.nn.MSELoss()
 scale_model = Model_Scale(config=config).to(device)
 if args.resume_training:
     diffusion_model.load_state_dict(torch.load(args.diffusion_model_path))
     scale_model.load_state_dict(torch.load(args.scale_model_path))
+
 train_loader, test_loader, model = wrapper_dataset(config, args, device)
+
 model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))
 model = model.to(device)
 if config.training.loss == 'mse':

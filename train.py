@@ -35,6 +35,9 @@ def train(args, config, optimizer, optimizer_scale,
           model, train_loader, padding, mat_shape,
           ema_helper, tb_logger, loss_fn,
           opt_error_loss):
+    """
+    model: pretrained model of final problem (Lenet5 or Tinynerf).
+    """
     epochs = config.training.epochs
     weight_name = config.model.weight_name
     grad_accum = config.training.grad_accum
@@ -94,8 +97,7 @@ def train(args, config, optimizer, optimizer_scale,
                     verbose=False
                 )
             diff_weight = weight - dmodel_original_weight  # calculate optimal weight difference from baseline
-            t = torch.randint(low=0, high=diffusion_num_steps, size=(1,)
-                              ).to(device)  # Sample random timestamp
+            t = torch.randint(low=0, high=diffusion_num_steps, size=(1,)).to(device)  # Sample random timestamp
             weight_noisy, error, sigma = noising(diff_weight, t)
             if args.datatype == 'tinynerf':
                 encoding_out = vgg_encode(outin)

@@ -9,10 +9,12 @@ import Lenet5
 from torch.utils.data import DataLoader
 from torchvision.transforms import ToTensor
 from copy import deepcopy
+
+
 def wrapper_dataset(config, args, device):
     if args.datatype == 'tinynerf':
-        
-        data =  np.load(args.data_train_path)
+
+        data = np.load(args.data_train_path)
         images = data["images"]
         # Camera extrinsics (poses)
         tform_cam2world = data["poses"]
@@ -55,11 +57,11 @@ def wrapper_dataset(config, args, device):
         batch['far_thresh'] = far_thresh
         batch['depth_samples_per_ray'] = depth_samples_per_ray
         batch['encode'] = encode
-        batch['get_minibatches'] =get_minibatches
-        batch['chunksize'] =chunksize
+        batch['get_minibatches'] = get_minibatches
+        batch['chunksize'] = chunksize
         batch['num_encoding_functions'] = num_encoding_functions
-        train_ds, test_ds = [],[]
-        for img,tfrom in zip(images,tform_cam2world):
+        train_ds, test_ds = [], []
+        for img, tfrom in zip(images, tform_cam2world):
             batch['input'] = tfrom
             batch['output'] = img
             train_ds.append(deepcopy(batch))
@@ -69,27 +71,27 @@ def wrapper_dataset(config, args, device):
     elif args.datatype == 'mnist':
         model = Lenet5.NetOriginal()
         train_transform = transforms.Compose(
-                            [
-                            transforms.ToTensor()
-                            ])
+            [
+                transforms.ToTensor()
+            ])
         train_dataset = mnist.MNIST(
-                "\data\mnist", train=True, download=True, transform=ToTensor())
+            "\data\mnist", train=True, download=True, transform=ToTensor())
         test_dataset = mnist.MNIST(
-                "\data\mnist", train=False, download=True, transform=ToTensor())
+            "\data\mnist", train=False, download=True, transform=ToTensor())
         train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=1)
-        train_ds, test_ds = [],[]
+        train_ds, test_ds = [], []
         for idx, data in enumerate(train_loader):
             train_x, train_label = data[0], data[1]
-            train_x = train_x[:,0,:,:].unsqueeze(1)
-            batch = {'input':train_x,'output':train_label}
+            train_x = train_x[:, 0, :, :].unsqueeze(1)
+            batch = {'input': train_x, 'output': train_label}
             train_ds.append(deepcopy(batch))
         for idx, data in enumerate(test_loader):
             train_x, train_label = data[0], data[1]
-            train_x = train_x[:,0,:,:].unsqueeze(1)
-            batch = {'input':train_x,'output':train_label}
+            train_x = train_x[:, 0, :, :].unsqueeze(1)
+            batch = {'input': train_x, 'output': train_label}
             test_ds.append(deepcopy(batch))
     else:
         "implement on your own"
         pass
-    return train_ds,test_ds,model
+    return train_ds, test_ds, model

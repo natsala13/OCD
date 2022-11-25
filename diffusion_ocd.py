@@ -254,7 +254,7 @@ class Model_Scale(nn.Module):
             own_state[name].copy_(param)
 
 
-class Model(nn.Module):
+class DiffusionModel(nn.Module):
     def __init__(self, config=''):
         super().__init__()
         nch = config.diffusion.nch
