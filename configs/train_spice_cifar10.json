@@ -76,7 +76,7 @@
             "root_folder":"./datasets/cifar10",
             "embedding": "../SPICE/results/cifar10/embedding/feas_moco_512_l2.npy",
             "train":true,
-            "all":true,
+            "all":false,
             "ims_per_batch":5000,
             "shuffle":true,
             "aspect_ratio_grouping":false,
