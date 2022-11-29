@@ -1,0 +1,71 @@
+{
+    "training": {
+        "epochs": 100000,
+        "grad_accum": 8,
+        "grad_clip": 1.0,
+        "loss": "ce"
+    },
+    "model": {
+        "weight_name": "fc1",
+        "name":"mnist"
+    },
+    "checkpoint": {
+        "checkpoint_path": "",
+        "n_checkpoint": 1
+    },
+    "diffusion": {
+        "dropout": 0.4,
+        "diffusion_num_steps": 1000,
+        "diffusion_num_steps_eval": 10,
+        "nch": 128,
+        "out_ch": 1,
+        "ch_mult": [1, 1, 2, 2, 4, 4],
+        "dim_in": 84,
+        "dim_lat_out": 120,
+        "dim_output": 10,
+        "scale":{
+            "ch": 128, 
+            "in_dim": 84,
+            "out_dim": 120
+        }
+
+    },
+    "overfitting": {
+        "lr_overfitting": 5e-4,
+        "n_overfitting": 3
+    },
+    "spice_model": {
+        "feature": {
+            "type": "clusterresnet",
+            "num_classes": 200,
+            "in_channels": 3,
+            "in_size": 64,
+            "batchnorm_track": true,
+            "test": false,
+            "feature_only": true
+        },
+        "head": {
+            "type": "sem_multi",
+            "multi_heads": {
+                "classifier": {
+                    "type": "mlp",
+                    "num_neurons": [512, 512, 200],
+                    "last_activation": "softmax"
+                },
+                "feature_conv": null,
+                "num_cluster": 200,
+                "ratio_start": 1,
+                "ratio_end": 1,
+                "center_ratio": 0.5
+            },
+            "ratio_confident": 0.90,
+            "num_neighbor": 100
+              },
+        "model_type": "moco_select",
+        "pretrained": "./models/self_model_tiny_imagenet.tar",
+        "head_id": 3,
+        "freeze_conv": true
+}
+
+}
+

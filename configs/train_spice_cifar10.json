@@ -1,0 +1,135 @@
+{
+    "training": {
+        "epochs": 100000,
+        "grad_accum": 8,
+        "grad_clip": 1.0,
+        "loss": "ce"
+    },
+    "model": {
+        "weight_name": "head.head_0.classifier.lin2",
+        "name":"spice"
+    },
+    "checkpoint": {
+        "checkpoint_path": "",
+        "n_checkpoint": 1
+    },
+    "diffusion": {
+        "dropout": 0.4,
+        "diffusion_num_steps": 1000,
+        "diffusion_num_steps_eval": 10,
+        "nch": 128,
+        "out_ch": 1,
+        "ch_mult": [1, 1, 2, 2, 4, 4],
+        "dim_in": 84,
+        "dim_lat_out": 120,
+        "dim_output": 10,
+        "scale":{
+            "ch": 128,
+            "in_dim": 84,
+            "out_dim": 120
+        }
+
+    },
+    "overfitting": {
+        "lr_overfitting": 5e-4,
+        "n_overfitting": 3
+    },
+    "spice":{
+        "model": {
+            "feature": {
+                "type": "resnet18_cifar",
+                "num_classes": 10,
+                "in_channels": 3,
+                "in_size": 32,
+                "batchnorm_track": true,
+                "test": false,
+                "feature_only": true
+            },
+            "head": {
+                "type": "sem_multi",
+                "multi_heads": [{
+                    "classifier": {
+                        "type": "mlp",
+                        "num_neurons": [512, 512, 10],
+                        "last_activation": "softmax"
+                    },
+                    "feature_conv": null,
+                    "num_cluster": 10,
+                    "loss_weight": {"loss_cls":  1},
+                    "iter_start": 30,
+                    "iter_up": 30,
+                    "iter_down": 30,
+                    "iter_end": 30,
+                    "ratio_start": 1,
+                    "ratio_end": 1,
+                    "center_ratio": 0.5,
+                    "num_heads": 10
+                }]
+                  },
+            "model_type": "moco",
+            "pretrained": "./models/self_model_cifar10.tar",
+            "head_id": 3,
+            "freeze_conv": true
+        },
+        "data_train": {
+            "type": "cifar10",
+            "root_folder":"./datasets/cifar10",
+            "embedding": "./results/cifar10/embedding/feas_moco_512_l2.npy",
+            "train":true,
+            "all":true,
+            "ims_per_batch":5000,
+            "shuffle":true,
+            "aspect_ratio_grouping":false,
+            "show":false,
+            "trans1": {
+                  "aug_type": "weak",
+                  "crop_size": 32,
+                  "normalize": {
+                      "mean": [0.485, 0.456, 0.406],
+                      "std": [0.229, 0.224, 0.225]
+                  }
+            } ,
+            "trans2": {
+                  "aug_type": "scan",
+                  "crop_size": 32,
+                  "normalize": {
+                      "mean": [0.485, 0.456, 0.406],
+                      "std": [0.229, 0.224, 0.225]
+                  },
+                  "num_strong_augs": 4,
+                  "cutout_kwargs": {
+                      "n_holes": 1,
+                      "length": 16,
+                      "random": true
+                  }
+            }
+        },
+        "data_test": {
+            "type": "cifar10",
+            "root_folder":"./datasets/cifar10",
+            "embedding": "./results/cifar10/embedding/feas_moco_512_l2.npy",
+            "train":true,
+            "all":true,
+            "ims_per_batch":50,
+            "shuffle":false,
+            "aspect_ratio_grouping":false,
+            "show":false,
+            "trans1": {
+                "aug_type": "test",
+                "normalize": {
+                    "mean": [0.485, 0.456, 0.406],
+                    "std": [0.229, 0.224, 0.225]
+                }
+            } ,
+            "trans2": {
+                "aug_type": "test",
+                "normalize": {
+                    "mean": [0.485, 0.456, 0.406],
+                    "std": [0.229, 0.224, 0.225]
+                }
+            }
+        }
+    }
+
+}
+

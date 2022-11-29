@@ -10,8 +10,106 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import ToTensor
 from copy import deepcopy
 
+import attrdict
+from pathlib import Path
+from utils_OCD import ConfigWrapper
 
-def wrapper_dataset(config, args, device):
+from SPICE.spice.model.sim2sem import Sim2Sem
+from SPICE.spice.data.build_dataset import build_dataset
+
+
+def build_model_for_cifar10(config: ConfigWrapper, args, device):
+    if args.weight:
+        config['spice']['model']['pretrained'] = args.weight
+
+    # **************** Model ****************
+    model = Sim2Sem(**config['spice']['model'])
+    print(model)
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    # model.eval()  # model.train(False)
+
+    # TODO: Load checkpoint
+    checkpoint = torch.load(config['spice']['model']['pretrained'], map_location=torch.device('cpu'))
+    model.load_state_dict(checkpoint['state_dict'])
+    # if cfg.model.pretrained is not None:
+    #     load_model_weights(model, cfg.model.pretrained, cfg.model.model_type)
+    # ****************************************
+
+    # TODO: DO I need it?
+    # optimizer = make_optimizer(cfg, model)
+
+    # *************** Dataset ****************
+    train_dataset = build_dataset(config['spice']['data_train'])
+
+    # TODO: batch size = 1?, num workers = 4?
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=1, shuffle=True,
+        num_workers=4, pin_memory=True, drop_last=True)
+
+    dataset_val = build_dataset(config['spice']['data_test'])
+    test_loader = torch.utils.data.DataLoader(dataset_val, batch_size=1, shuffle=False, num_workers=1)
+
+    # TODO: Making sure the data set includes all needed transformations.
+
+    train_ds, test_ds = [], []
+    for data in train_loader:
+        train_x, train_label = data[0], data[1]
+        train_x = train_x[:, 0, :, :].unsqueeze(1)
+        batch = {'input': train_x, 'output': train_label}
+        train_ds.append(deepcopy(batch))
+
+    for data in test_loader:
+        train_x, train_label = data[0], data[1]
+        train_x = train_x[:, 0, :, :].unsqueeze(1)
+        batch = {'input': train_x, 'output': train_label}
+        test_ds.append(deepcopy(batch))
+
+    return train_ds, test_ds, model
+
+
+def spice_model_build(config: ConfigWrapper, args):
+    if args.weight:
+        config['spice_model']['pretrained'] = args.weight
+
+    # create model
+    model = Sim2Sem(**config['spice_model'])
+    print(model)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    # model.eval()  # model.train(False)
+
+
+    train_dataset = build_dataset(config[data_train])
+
+    val_loader = torch.utils.data.DataLoader(dataset_val, batch_size=cfg.batch_size, shuffle=False, num_workers=1)
+
+    train_transform = transforms.Compose(
+        [
+            transforms.ToTensor()
+        ])
+    train_dataset = mnist.MNIST(
+        "\data\mnist", train=True, download=True, transform=ToTensor())
+    test_dataset = mnist.MNIST(
+        "\data\mnist", train=False, download=True, transform=ToTensor())
+    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=1)
+    train_ds, test_ds = [], []
+    for idx, data in enumerate(train_loader):
+        train_x, train_label = data[0], data[1]
+        train_x = train_x[:, 0, :, :].unsqueeze(1)
+        batch = {'input': train_x, 'output': train_label}
+        train_ds.append(deepcopy(batch))
+    for idx, data in enumerate(test_loader):
+        train_x, train_label = data[0], data[1]
+        train_x = train_x[:, 0, :, :].unsqueeze(1)
+        batch = {'input': train_x, 'output': train_label}
+        test_ds.append(deepcopy(batch))
+
+    return train_ds, test_ds, model
+
+
+def wrapper_dataset(config: ConfigWrapper, args, device):
     if args.datatype == 'tinynerf':
 
         data = np.load(args.data_train_path)
@@ -91,6 +189,8 @@ def wrapper_dataset(config, args, device):
             train_x = train_x[:, 0, :, :].unsqueeze(1)
             batch = {'input': train_x, 'output': train_label}
             test_ds.append(deepcopy(batch))
+    elif args.datatype == 'tinyimagenet':
+        train_ds, test_ds, model = build_model_for_cifar10(config, args, device)
     else:
         "implement on your own"
         pass

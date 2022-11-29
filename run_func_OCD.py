@@ -16,6 +16,8 @@ import os
 import argparse
 import json
 from data_loader import wrapper_dataset
+from attrdict import AttrDict
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -65,6 +67,8 @@ args = parser.parse_args()
 print(args)
 with open(args.config_path) as f:
     config = ConfigWrapper(**json.load(f))
+
+config = AttrDict(config)
 torch.manual_seed(123456789)
 
 ##########################################################################################################
@@ -86,8 +90,9 @@ if args.resume_training:
 
 train_loader, test_loader, model = wrapper_dataset(config, args, device)
 
-model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))
+model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))  # Load the pre-trained model.
 model = model.to(device)
+
 if config.training.loss == 'mse':
     opt_error_loss = torch.nn.MSELoss()
 elif config.training.loss == 'ce':
@@ -101,9 +106,10 @@ ema_helper = EMAHelper(mu=0.9999)
 ema_helper.register(diffusion_model)
 
 ################################################# Check if weight is OK ##########################
-weight_name = config.model.weight_name
+weight_name = config.model.weight_name  # TODO: Change name.
 dmodel_original_weight = deepcopy(model.get_parameter(weight_name + '.weight'))
 mat_shape = dmodel_original_weight.shape
+
 assert len(mat_shape) == 2, "Weight to overfit should be a matrix !"
 padding = []
 for s in mat_shape:
