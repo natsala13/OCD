@@ -31,7 +31,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
 
     # TODO: Load checkpoint
     checkpoint = torch.load(config['spice']['model']['pretrained'], map_location=torch.device('cpu'))
-    model.load_state_dict(checkpoint['state_dict'])
+    model.load_state_dict(checkpoint)
     # if cfg.model.pretrained is not None:
     #     load_model_weights(model, cfg.model.pretrained, cfg.model.model_type)
     # ****************************************
