@@ -19,8 +19,8 @@ from spice.data.build_dataset import build_dataset
 
 
 def build_model_for_cifar10(config: ConfigWrapper, args, device):
-    if args.weight:
-        config['spice']['model']['pretrained'] = args.weight
+    # if args.weight:
+    #     config['spice']['model']['pretrained'] = args.weight
 
     # **************** Model ****************
     model = Sim2Sem(**config['spice']['model'])
@@ -189,7 +189,7 @@ def wrapper_dataset(config: ConfigWrapper, args, device):
             train_x = train_x[:, 0, :, :].unsqueeze(1)
             batch = {'input': train_x, 'output': train_label}
             test_ds.append(deepcopy(batch))
-    elif args.datatype == 'tinyimagenet':
+    elif args.datatype == 'cifar10':
         train_ds, test_ds, model = build_model_for_cifar10(config, args, device)
     else:
         "implement on your own"

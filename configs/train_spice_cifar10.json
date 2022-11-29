@@ -63,10 +63,10 @@
                     "ratio_start": 1,
                     "ratio_end": 1,
                     "center_ratio": 0.5,
-                    "num_heads": 10
+                    "num_heads": 1
                 }]
                   },
-            "model_type": "moco",
+            "model_type": "moco_select",
             "pretrained": "./models/self_model_cifar10.tar",
             "head_id": 3,
             "freeze_conv": true
