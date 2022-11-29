@@ -14,8 +14,8 @@ import attrdict
 from pathlib import Path
 from utils_OCD import ConfigWrapper
 
-from SPICE.spice.model.sim2sem import Sim2Sem
-from SPICE.spice.data.build_dataset import build_dataset
+from spice.model.sim2sem import Sim2Sem
+from spice.data.build_dataset import build_dataset
 
 
 def build_model_for_cifar10(config: ConfigWrapper, args, device):
