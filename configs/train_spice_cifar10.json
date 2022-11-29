@@ -74,7 +74,7 @@
         "data_train": {
             "type": "cifar10",
             "root_folder":"./datasets/cifar10",
-            "embedding": "./results/cifar10/embedding/feas_moco_512_l2.npy",
+            "embedding": "../SPICE/results/cifar10/embedding/feas_moco_512_l2.npy",
             "train":true,
             "all":true,
             "ims_per_batch":5000,
@@ -107,7 +107,7 @@
         "data_test": {
             "type": "cifar10",
             "root_folder":"./datasets/cifar10",
-            "embedding": "./results/cifar10/embedding/feas_moco_512_l2.npy",
+            "embedding": "../SPICE/results/cifar10/embedding/feas_moco_512_l2.npy",
             "train":true,
             "all":true,
             "ims_per_batch":50,
