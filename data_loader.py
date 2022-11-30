@@ -56,13 +56,13 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     train_ds, test_ds = [], []
     for data in train_loader:
         train_x, train_label = data[0], data[1]
-        train_x = train_x[:, 0, :, :].unsqueeze(1)
+        train_x = train_x[:train_x, 0, :, :].unsqueeze(1)
         batch = {'input': train_x, 'output': train_label}
         train_ds.append(deepcopy(batch))
 
     for data in test_loader:
         train_x, train_label = data[0], data[1]
-        train_x = train_x[:, 0, :, :].unsqueeze(1)
+        # train_x = train_x[:, 0, :, :].unsqueeze(1)
         batch = {'input': train_x, 'output': train_label}
         test_ds.append(deepcopy(batch))
 
