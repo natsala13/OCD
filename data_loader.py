@@ -56,6 +56,10 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
 
     # TODO: Making sure the data set includes all needed transformations.
 
+    train0 = next(iter(train_loader))
+    test0 = next(iter(test_loader))
+
+
     print('* Converting all data')
     # train_ds, test_ds = [], []
     # for data in train_loader:
