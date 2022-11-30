@@ -87,7 +87,7 @@ def train(args, config, optimizer, optimizer_scale,
         optimizer.zero_grad()
         difflosslogger = 0
         optimizer_scale.zero_grad()
-        for idx, batch in enumerate(train_loader):
+        for idx, data in enumerate(train_loader):
             optimizer_scale.zero_grad()
 
             train_x, train_label = data[0], data[1]
