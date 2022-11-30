@@ -63,7 +63,8 @@
                     "ratio_start": 1,
                     "ratio_end": 1,
                     "center_ratio": 0.5,
-                    "num_heads": 1
+                    "num_heads": 1,
+                    "return_extra_index": [1, 2]
                 }]
                   },
             "model_type": "moco_select",
