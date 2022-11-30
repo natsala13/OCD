@@ -70,7 +70,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     #     batch = {'input': train_x, 'output': train_label}
     #     test_ds.append(deepcopy(batch))
 
-    return train_ds, test_ds, model
+    return train_loader, test_loader, model
 
 
 def spice_model_build(config: ConfigWrapper, args):
