@@ -53,9 +53,14 @@ def train(args, config, optimizer, optimizer_scale,
     if args.precompute_all == 1:
         print('precomputation of overfitting to save time starts')
         ws, hs, outs = [], [], []
-        for idx, batch in enumerate(train_loader):
+        for idx, data in enumerate(train_loader):
             print(f'Trianing batch {idx} / 100...')
             optimizer_scale.zero_grad()
+
+            train_x, train_label = data[0], data[1]
+            # train_x = train_x[:, 0, :, :].unsqueeze(1)
+            batch = {'input': train_x, 'output': train_label}
+
             batch['input'] = batch['input'].to(device)
             batch['output'] = batch['output'].to(device)
             # Overfitting encapsulation #
