@@ -23,13 +23,14 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     #     config['spice']['model']['pretrained'] = args.weight
 
     # **************** Model ****************
+    print('* Building model')
     model = Sim2Sem(**config['spice']['model'])
-    print(model)
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     # model.eval()  # model.train(False)
 
     # TODO: Load checkpoint
+    print('* Loading checkpoint to model')
     checkpoint = torch.load(config['spice']['model']['pretrained'], map_location=torch.device('cpu'))
     state_dict = {k.replace('module.', '', 1): checkpoint[k] for k in checkpoint}
     model.load_state_dict(state_dict)
@@ -41,6 +42,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     # optimizer = make_optimizer(cfg, model)
 
     # *************** Dataset ****************
+    print('* Loading dataset')
     train_dataset = build_dataset(config['spice']['data_train'])
 
     # TODO: batch size = 1?, num workers = 4?

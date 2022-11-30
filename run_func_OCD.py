@@ -106,6 +106,8 @@ ema_helper = EMAHelper(mu=0.9999)
 ema_helper.register(diffusion_model)
 
 ################################################# Check if weight is OK ##########################
+
+print('* Loading weight for further work')
 weight_name = config.model.weight_name  # TODO: Change name.
 dmodel_original_weight = deepcopy(model.get_parameter(weight_name + '.weight'))
 mat_shape = dmodel_original_weight.shape
@@ -129,7 +131,7 @@ print(padding)
 #################################################################################################
 ########################################### Train Phase #########################################
 #################################################################################################
-
+print('* Train start')
 if args.train:
     diffusion_model, scale_model = train(args=args, config=config, optimizer=optimizer, optimizer_scale=optimizer_scale,
                                          device=device, diffusion_model=diffusion_model, scale_model=scale_model,

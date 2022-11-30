@@ -49,6 +49,7 @@ def train(args, config, optimizer, optimizer_scale,
     n_overfitting = config.overfitting.n_overfitting
     step = 0
     dmodel_original_weight = deepcopy(model.get_parameter(weight_name + '.weight'))
+    print(f'* Precomputing all - {args.precompute_all=}')
     if args.precompute_all == 1:
         print('precomputation of overfitting to save time starts')
         ws, hs, outs = [], [], []
@@ -72,8 +73,10 @@ def train(args, config, optimizer, optimizer_scale,
             outs.append(deepcopy(outin.detach().cpu()))
 
         print('precomputation finished')
-    print('Start Training')
+    print(f'* Epochs starting {epochs}')
     for epoch in range(epochs):
+        if epochs % 10 == 2:
+            print(f'    ** epochs {epoch} / {epochs} starting')
         avg_loss = 0
         count = 0
         optimizer.zero_grad()
