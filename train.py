@@ -57,7 +57,7 @@ def train(args, config, optimizer, optimizer_scale,
             print(f'Trianing batch {idx} / 100...')
             optimizer_scale.zero_grad()
 
-            train_x, train_label = data[0], data[1]
+            train_x, train_label = data[0], data[3]
             # train_x = train_x[:, 0, :, :].unsqueeze(1)
             batch = {'input': train_x, 'output': train_label}
 
