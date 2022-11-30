@@ -42,7 +42,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     # optimizer = make_optimizer(cfg, model)
 
     # *************** Dataset ****************
-    print('* Loading dataset')
+    print('* Loading train data')
     train_dataset = build_dataset(config['spice']['data_train'])
 
     # TODO: batch size = 1?, num workers = 4?
@@ -50,11 +50,13 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
         train_dataset, batch_size=1, shuffle=True,
         num_workers=4, pin_memory=True, drop_last=True)
 
+    print('* Loading test data')
     dataset_val = build_dataset(config['spice']['data_test'])
     test_loader = torch.utils.data.DataLoader(dataset_val, batch_size=1, shuffle=False, num_workers=1)
 
     # TODO: Making sure the data set includes all needed transformations.
 
+    print('* Converting all data')
     train_ds, test_ds = [], []
     for data in train_loader:
         train_x, train_label = data[0], data[1]
