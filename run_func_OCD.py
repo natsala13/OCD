@@ -90,7 +90,7 @@ if args.resume_training:
 
 train_loader, test_loader, model = wrapper_dataset(config, args, device)
 
-model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))  # Load the pre-trained model.
+# model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))  # Load the pre-trained model.
 model = model.to(device)
 
 if config.training.loss == 'mse':
