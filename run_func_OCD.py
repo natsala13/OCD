@@ -82,7 +82,9 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 lr = args.learning_rate  # learning rate for the diffusion model & scale estimation model
 
 diffusion_model = DiffusionModel(config=config).to(device)
-loss_fn = torch.nn.MSELoss()
+# loss_fn = torch.nn.MSELoss()
+loss_fn = torch.nn.CrossEntropyLoss()
+
 scale_model = Model_Scale(config=config).to(device)
 if args.resume_training:
     diffusion_model.load_state_dict(torch.load(args.diffusion_model_path))
