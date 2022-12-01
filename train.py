@@ -77,6 +77,9 @@ def train(args, config, optimizer, optimizer_scale,
             hs.append(deepcopy(hfirst))
             outs.append(deepcopy(outin.detach().cpu()))
 
+            del batch['input']
+            torch.cuda.empty_cache()
+
         print('precomputation finished')
     print(f'* Epochs starting {epochs}')
     for epoch in range(epochs):
