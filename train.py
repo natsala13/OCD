@@ -140,7 +140,7 @@ def train(args, config, optimizer, optimizer_scale,
                 tb_logger.add_scalar("loss_diff", difflosslogger, global_step=step // grad_accum)
                 difflosslogger = 0
                 torch.nn.utils.clip_grad_norm_(
-                    diffusion_model.parameters(), grad_clip, error_if_nonfinite=True
+                    diffusion_model.parameters(), grad_clip, error_if_nonfinite=False
                 )
                 optimizer.step()
                 ema_helper.update(diffusion_model)
