@@ -88,6 +88,9 @@ def train(args, config, optimizer, optimizer_scale,
         difflosslogger = 0
         optimizer_scale.zero_grad()
         for idx, data in enumerate(train_loader):
+            if idx % 10 == 0:
+                print(f'Training batch {idx} / {len(train_loader)}')
+
             optimizer_scale.zero_grad()
 
             train_x, train_label = data[0], data[3]
@@ -100,6 +103,7 @@ def train(args, config, optimizer, optimizer_scale,
             if args.precompute_all:
                 weight, hfirst, outin = ws[idx].to(device), hs[idx], outs[idx].to(device)
             else:
+                print('* Overfitting one batch')
                 weight, hfirst, outin = overfitting_batch_wrapper(
                     datatype=args.datatype,
                     bmodel=model, weight_name=weight_name,
@@ -109,6 +113,7 @@ def train(args, config, optimizer, optimizer_scale,
                     lr=lr_overfitting,
                     verbose=False
                 )
+            print('* Overfitting one batch - Over')
             diff_weight = weight - dmodel_original_weight  # calculate optimal weight difference from baseline
             t = torch.randint(low=0, high=diffusion_num_steps, size=(1,)).to(device)  # Sample random timestamp
             weight_noisy, error, sigma = noising(diff_weight, t)
@@ -122,6 +127,7 @@ def train(args, config, optimizer, optimizer_scale,
                 encoding_out,
                 t.float()
             )
+
             scale = scale_model(hfirst, encoding_out)  # estimate scale
             estimated_error = estimated_error[:, 0, padding[0][0]:padding[0][0] + mat_shape[0],
                               padding[1][0]:padding[1][0] + mat_shape[1]]  # remove padding
