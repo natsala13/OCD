@@ -94,20 +94,16 @@ def train(args, config, optimizer, optimizer_scale,
 
         print(f'# Epoch {epoch} starting - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
-        for idx, data in enumerate(train_loader):
+        for idx, batch in enumerate(train_loader):
             if idx % 10 == 0:
                 print(f'Training batch {idx} / {len(train_loader)}')
 
             print(f'# Training batch {idx} - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
             optimizer_scale.zero_grad()
-
-            train_x, train_label = data[0], data[3]
-            # train_x = train_x[:, 0, :, :].unsqueeze(1)
-            batch = {'input': train_x, 'output': train_label}
-
-            batch['input'] = batch['input'].to(device)
-            batch['output'] = batch['output'].to(device)
+            if args.datatype == 'cifar10':
+                train_x, train_label = batch[0], batch[3]
+                batch = {'input': train_x.to(device), 'output': train_label.to(device)}
 
             print(f'# Batch {idx} to device - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
