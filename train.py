@@ -39,7 +39,7 @@ def calc_score(model, eval_loader):
     labels_gt = []
 
     with torch.no_grad():
-        for image, target, _ in eval_loader:
+        for image, target in eval_loader:
             image = image.type(torch.FloatTensor).cuda()
             logit = model(image)
 
