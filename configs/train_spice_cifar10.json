@@ -6,7 +6,7 @@
         "loss": "ce"
     },
     "model": {
-        "weight_name": "head.head_0.classifier.lin2",
+        "weight_name": "fc.weight",
         "name":"spice"
     },
     "checkpoint": {

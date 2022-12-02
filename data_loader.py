@@ -16,30 +16,61 @@ from utils_OCD import ConfigWrapper
 
 from spice.model.sim2sem import Sim2Sem
 from spice.data.build_dataset import build_dataset
+from fixmatch.models.nets.wrn import WideResNet
+from fixmatch.datasets.ssl_dataset_robust import SSL_Dataset
+from fixmatch.datasets.data_utils import get_data_loader
+
+
+WIDERESNET_DEPTH = 28
+WIDERESNET_WIDDEN = 2
+WIDERESNET_LEAKY_SLOPE = 0.1
+WIDERESNET_DROPRATE = 0.0
 
 
 def build_model_for_cifar10(config: ConfigWrapper, args, device):
-    # if args.weight:
-    #     config['spice']['model']['pretrained'] = args.weight
-
-    # **************** Model ****************
     print('* Building model')
-    model = Sim2Sem(**config['spice']['model'])
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    # model.eval()  # model.train(False)
+    model = WideResNet(depth=WIDERESNET_DEPTH,
+                       num_classes=10,
+                       widen_factor=WIDERESNET_WIDDEN,
+                       bn_momentum=0.1,
+                       leaky_slope=WIDERESNET_LEAKY_SLOPE,
+                       dropRate=WIDERESNET_DROPRATE)
 
-    # TODO: Load checkpoint
     print('* Loading checkpoint to model')
     checkpoint = torch.load(config['spice']['model']['pretrained'], map_location=torch.device('cpu'))
-    state_dict = {k.replace('module.', '', 1): checkpoint[k] for k in checkpoint}
+    state_dict = {k.replace('module.', '', 1): checkpoint['eval_model'][k] for k in checkpoint['eval_model']}
     model.load_state_dict(state_dict)
-    # if cfg.model.pretrained is not None:
-    #     load_model_weights(model, cfg.model.pretrained, cfg.model.model_type)
-    # ****************************************
+    model = model.to(device)
 
-    # TODO: DO I need it?
-    # optimizer = make_optimizer(cfg, model)
+    _eval_dset = SSL_Dataset(name='cifar10',
+                             train=False,
+                             data_dir=config['spice']['data_train'],
+                             label_file=None,
+                             all=True,
+                             unlabeled=False)
+
+    eval_dset = _eval_dset.get_dset()
+    print(len(eval_dset))
+
+    eval_loader = get_data_loader(eval_dset,
+                                  args.batch_size,
+                                  num_workers=1)
+
+    return eval_loader, eval_loader, model
+
+
+def spice_model_build(config: ConfigWrapper, args, device):
+    if args.weight:
+        config['spice_model']['pretrained'] = args.weight
+
+    # create model
+    model = Sim2Sem(**config['spice_model'])
+
+    print('* Loading checkpoint to model')
+    checkpoint = torch.load(config['spice']['model']['pretrained'], map_location=torch.device('cpu'))
+    state_dict = {k.replace('module.', '', 1): checkpoint['eval_model'][k] for k in checkpoint['eval_model']}
+    model.load_state_dict(state_dict)
+    model = model.to(device)
 
     # *************** Dataset ****************
     print('* Loading train data')
@@ -54,68 +85,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     dataset_val = build_dataset(config['spice']['data_test'])
     test_loader = torch.utils.data.DataLoader(dataset_val, batch_size=1, shuffle=False, num_workers=1)
 
-    # TODO: Making sure the data set includes all needed transformations.
-
-    train0 = next(iter(train_loader))
-    test0 = next(iter(test_loader))
-
-
-    print('* Converting all data')
-    # train_ds, test_ds = [], []
-    # for data in train_loader:
-    #     train_x, train_label = data[0], data[1]
-    #     # train_x = train_x[:, 0, :, :].unsqueeze(1)
-    #     batch = {'input': train_x, 'output': train_label}
-    #     train_ds.append(deepcopy(batch))
-    #
-    # for data in test_loader:
-    #     train_x, train_label = data[0], data[1]
-    #     # train_x = train_x[:, 0, :, :].unsqueeze(1)
-    #     batch = {'input': train_x, 'output': train_label}
-    #     test_ds.append(deepcopy(batch))
-
     return train_loader, test_loader, model
-
-
-def spice_model_build(config: ConfigWrapper, args):
-    if args.weight:
-        config['spice_model']['pretrained'] = args.weight
-
-    # create model
-    model = Sim2Sem(**config['spice_model'])
-    print(model)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    # model.eval()  # model.train(False)
-
-
-    train_dataset = build_dataset(config[data_train])
-
-    val_loader = torch.utils.data.DataLoader(dataset_val, batch_size=cfg.batch_size, shuffle=False, num_workers=1)
-
-    train_transform = transforms.Compose(
-        [
-            transforms.ToTensor()
-        ])
-    train_dataset = mnist.MNIST(
-        "\data\mnist", train=True, download=True, transform=ToTensor())
-    test_dataset = mnist.MNIST(
-        "\data\mnist", train=False, download=True, transform=ToTensor())
-    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=1)
-    train_ds, test_ds = [], []
-    for idx, data in enumerate(train_loader):
-        train_x, train_label = data[0], data[1]
-        train_x = train_x[:, 0, :, :].unsqueeze(1)
-        batch = {'input': train_x, 'output': train_label}
-        train_ds.append(deepcopy(batch))
-    for idx, data in enumerate(test_loader):
-        train_x, train_label = data[0], data[1]
-        train_x = train_x[:, 0, :, :].unsqueeze(1)
-        batch = {'input': train_x, 'output': train_label}
-        test_ds.append(deepcopy(batch))
-
-    return train_ds, test_ds, model
 
 
 def wrapper_dataset(config: ConfigWrapper, args, device):
