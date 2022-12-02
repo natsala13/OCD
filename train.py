@@ -92,20 +92,13 @@ def train(args, config, optimizer, optimizer_scale,
         difflosslogger = 0
         optimizer_scale.zero_grad()
 
-        print(f'# Epoch {epoch} starting - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
-
         for idx, batch in enumerate(train_loader):
             if idx % 10 == 0:
                 print(f'Training batch {idx} / {len(train_loader)}')
-
-            print(f'# Training batch {idx} - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
-
             optimizer_scale.zero_grad()
             if args.datatype == 'cifar10':
                 train_x, train_label = batch[0], batch[3]
                 batch = {'input': train_x.to(device), 'output': train_label.to(device)}
-
-            print(f'# Batch {idx} to device - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
             # Overfitting encapsulation #
             if args.precompute_all:
@@ -124,8 +117,6 @@ def train(args, config, optimizer, optimizer_scale,
                 del batch['input']
                 torch.cuda.empty_cache()
 
-                print(f'# Emptying batch {idx} - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
-
             print('* Overfitting one batch - Over')
 
             diff_weight = weight - dmodel_original_weight  # calculate optimal weight difference from baseline
@@ -143,12 +134,7 @@ def train(args, config, optimizer, optimizer_scale,
                 t.float()
             )
 
-            print(f'# Runned Diffusion model - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
-
             scale = scale_model(hfirst, encoding_out)  # estimate scale
-
-            print(f'# runned Scale model - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
-
             estimated_error = estimated_error[:, 0, padding[0][0]:padding[0][0] + mat_shape[0],
                               padding[1][0]:padding[1][0] + mat_shape[1]]  # remove padding
             ascale = diff_weight.view(-1).std()  # calculate optimal scale
@@ -162,7 +148,6 @@ def train(args, config, optimizer, optimizer_scale,
             lossdiff.backward()
             lscale.backward()
 
-            print(f'# Back prop on both models - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
             ############# Gradient accumulation for diffusion steps #################
             if ((idx + 1) % grad_accum == 0) or (idx + 1 == len(train_loader)):
                 print(f'* Running Gradient accumulation')
@@ -181,8 +166,6 @@ def train(args, config, optimizer, optimizer_scale,
             optimizer_scale.step()
             optimizer_scale.zero_grad()
 
-            print(f'# Grad norm _ optimiser - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
-
         if ((epoch + 1) % n_checkpoint == 0) or (epoch + 1 == epochs):
             print(
                 f'epoch {epoch + 1} save checkpoints: model_checkpoint_epoch{epoch}_step{step}_data{args.datatype}, scale_model_checkpoint_epoch{epoch}_loss{step}_data{args.datatype}')
@@ -190,4 +173,5 @@ def train(args, config, optimizer, optimizer_scale,
                        checkpoint_path + f'model_checkpoint_epoch{epoch}_step{step}_data{args.datatype}.pt')
             torch.save(scale_model.state_dict(),
                        checkpoint_path + f'scale_model_checkpoint_epoch{epoch}_loss{step}_data{args.datatype}.pt')
+
     return diffusion_model, scale_model

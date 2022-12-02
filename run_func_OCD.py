@@ -74,8 +74,6 @@ torch.manual_seed(123456789)
 ##########################################################################################################
 ####################################### Parameters & Initializations #####################################
 ##########################################################################################################
-print(f'# Start - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
-
 
 module_path = args.backbone_path  # path to desired pretrained model
 tb_path = args.tensorboard_path  # path to tensorboard log
@@ -83,25 +81,20 @@ tb_logger = tb.SummaryWriter(log_dir=tb_path)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 lr = args.learning_rate  # learning rate for the diffusion model & scale estimation model
 
-print(f'# tb and stuff - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 diffusion_model = DiffusionModel(config=config).to(device)
 # loss_fn = torch.nn.MSELoss()
 loss_fn = torch.nn.CrossEntropyLoss()
-print(f'# Diffusion model built - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
 scale_model = Model_Scale(config=config).to(device)
-print(f'# Scale model built - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 if args.resume_training:
     diffusion_model.load_state_dict(torch.load(args.diffusion_model_path))
     scale_model.load_state_dict(torch.load(args.scale_model_path))
 
 train_loader, test_loader, model = wrapper_dataset(config, args, device)
 
-print(f'# Data loaders built - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
 # model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))  # Load the pre-trained model.
 model = model.to(device)
-print(f'# Sim2sem 2 device - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
 if config.training.loss == 'mse':
     opt_error_loss = torch.nn.MSELoss()
@@ -115,15 +108,12 @@ optimizer_scale = torch.optim.Adam(scale_model.parameters(), lr=5 * lr)
 ema_helper = EMAHelper(mu=0.9999)
 ema_helper.register(diffusion_model)
 
-print(f'# Some losses, optims and stuff - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 ################################################# Check if weight is OK ##########################
 
 print('* Loading weight for further work')
 weight_name = config.model.weight_name  # TODO: Change name.
 dmodel_original_weight = deepcopy(model.get_parameter(weight_name + '.weight'))
 mat_shape = dmodel_original_weight.shape
-
-print(f'# Weight loaded - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
 assert len(mat_shape) == 2, "Weight to overfit should be a matrix !"
 padding = []
@@ -141,13 +131,11 @@ for s in mat_shape:
     else:
         padding.append([0, 0])
 
-print(f'# Padding created - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
 #################################################################################################
 ########################################### Train Phase #########################################
 #################################################################################################
 print('* Train start')
-print(f'# Train Start - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 if args.train:
     diffusion_model, scale_model = train(args=args, config=config, optimizer=optimizer, optimizer_scale=optimizer_scale,
                                          device=device, diffusion_model=diffusion_model, scale_model=scale_model,

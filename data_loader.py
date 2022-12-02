@@ -28,7 +28,6 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     # model.eval()  # model.train(False)
-    print(f'# Sim2Sem model built - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
     # TODO: Load checkpoint
     print('* Loading checkpoint to model')
@@ -45,7 +44,6 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     # *************** Dataset ****************
     print('* Loading train data')
     train_dataset = build_dataset(config['spice']['data_train'])
-    print(f'# Dataset Built - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
     # TODO: batch size = 1?, num workers = 4?
     train_loader = torch.utils.data.DataLoader(
