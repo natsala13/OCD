@@ -83,6 +83,7 @@ tb_logger = tb.SummaryWriter(log_dir=tb_path)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 lr = args.learning_rate  # learning rate for the diffusion model & scale estimation model
 
+print(f'# tb and stuff - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 diffusion_model = DiffusionModel(config=config).to(device)
 # loss_fn = torch.nn.MSELoss()
 loss_fn = torch.nn.CrossEntropyLoss()
@@ -114,12 +115,15 @@ optimizer_scale = torch.optim.Adam(scale_model.parameters(), lr=5 * lr)
 ema_helper = EMAHelper(mu=0.9999)
 ema_helper.register(diffusion_model)
 
+print(f'# Some losses, optims and stuff - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 ################################################# Check if weight is OK ##########################
 
 print('* Loading weight for further work')
 weight_name = config.model.weight_name  # TODO: Change name.
 dmodel_original_weight = deepcopy(model.get_parameter(weight_name + '.weight'))
 mat_shape = dmodel_original_weight.shape
+
+print(f'# Weight loaded - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
 assert len(mat_shape) == 2, "Weight to overfit should be a matrix !"
 padding = []
@@ -136,7 +140,9 @@ for s in mat_shape:
         padding.append([2, 1])
     else:
         padding.append([0, 0])
-print(padding)
+
+print(f'# Padding created - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
+
 #################################################################################################
 ########################################### Train Phase #########################################
 #################################################################################################
