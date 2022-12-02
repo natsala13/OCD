@@ -7,6 +7,9 @@ import torch.utils.tensorboard as tb
 from ema import EMAHelper
 import torchvision
 import torch.nn as nn
+import numpy as np
+
+from tools.eval_semi import calculate_acc
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -28,6 +31,31 @@ noise_model = NoiseModel().to(device)
 def vgg_encode(x):
     with torch.no_grad():
         return noise_model(x.unsqueeze(0).permute(0, 3, 1, 2).contiguous())
+
+
+def calc_score(model, eval_loader):
+    scores = []
+    labels_pred = []
+    labels_gt = []
+
+    with torch.no_grad():
+        for image, target, _ in eval_loader:
+            image = image.type(torch.FloatTensor).cuda()
+            logit = model(image)
+
+            scores.append(logit.cpu().numpy())
+
+            labels_pred.append(torch.max(logit, dim=-1)[1].cpu().numpy())
+            labels_gt.append(target.cpu().numpy())
+
+    labels_pred = np.concatenate(labels_pred, axis=0)
+    labels_gt = np.concatenate(labels_gt, axis=0)
+    try:
+        acc = calculate_acc(labels_pred, labels_gt)
+    except:
+        acc = -1
+
+    return acc
 
 
 def train(args, config, optimizer, optimizer_scale,
@@ -53,16 +81,14 @@ def train(args, config, optimizer, optimizer_scale,
     if args.precompute_all == 1:
         print('precomputation of overfitting to save time starts')
         ws, hs, outs = [], [], []
-        for idx, data in enumerate(train_loader):
+        for idx, batch in enumerate(train_loader):
             print(f'Trianing batch {idx} / 100...')
             optimizer_scale.zero_grad()
 
-            train_x, train_label = data[0], data[3]
-            # train_x = train_x[:, 0, :, :].unsqueeze(1)
-            batch = {'input': train_x, 'output': train_label}
+            if args.datatype == 'cifar10':
+                train_x, train_label = batch[0], batch[1]
+                batch = {'input': train_x.to(device), 'output': train_label.to(device)}
 
-            batch['input'] = batch['input'].to(device)
-            batch['output'] = batch['output'].to(device)
             # Overfitting encapsulation #
             weight, hfirst, outin = overfitting_batch_wrapper(
                 datatype=args.datatype,
@@ -104,7 +130,6 @@ def train(args, config, optimizer, optimizer_scale,
             if args.precompute_all:
                 weight, hfirst, outin = ws[idx].to(device), hs[idx], outs[idx].to(device)
             else:
-                print(f'* Overfitting one batch of size {len(batch["input"])}')
                 weight, hfirst, outin = overfitting_batch_wrapper(
                     datatype=args.datatype,
                     bmodel=model, weight_name=weight_name,
@@ -116,8 +141,6 @@ def train(args, config, optimizer, optimizer_scale,
                 )
                 del batch['input']
                 torch.cuda.empty_cache()
-
-            print('* Overfitting one batch - Over')
 
             diff_weight = weight - dmodel_original_weight  # calculate optimal weight difference from baseline
             t = torch.randint(low=0, high=diffusion_num_steps, size=(1,)).to(device)  # Sample random timestamp
@@ -159,7 +182,14 @@ def train(args, config, optimizer, optimizer_scale,
                 optimizer.step()
                 ema_helper.update(diffusion_model)
                 optimizer.zero_grad()
-            ############################################################################    
+            ############################################################################
+
+            acc = calc_score(model, train_loader)
+            print(f'Acc - {acc}')
+            tb_logger.add_scalar("acc", acc)
+
+            ############################################################################
+
             torch.nn.utils.clip_grad_norm_(
                 scale_model.parameters(), grad_clip, error_if_nonfinite=True
             )
