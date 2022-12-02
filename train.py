@@ -92,13 +92,13 @@ def train(args, config, optimizer, optimizer_scale,
         difflosslogger = 0
         optimizer_scale.zero_grad()
 
-        print(f'# Epoch {epoch} starting - {torch.cuda.memory_allocated()=}')
+        print(f'# Epoch {epoch} starting - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
         for idx, data in enumerate(train_loader):
             if idx % 10 == 0:
                 print(f'Training batch {idx} / {len(train_loader)}')
 
-            print(f'# Training batch {idx} - {torch.cuda.memory_allocated()=}')
+            print(f'# Training batch {idx} - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
             optimizer_scale.zero_grad()
 
