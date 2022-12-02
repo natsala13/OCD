@@ -78,7 +78,7 @@
             "embedding": "../SPICE/results/cifar10/embedding/feas_moco_512_l2.npy",
             "train":true,
             "all":false,
-            "ims_per_batch":5000,
+            "ims_per_batch":1,
             "shuffle":true,
             "aspect_ratio_grouping":false,
             "show":false,

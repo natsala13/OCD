@@ -81,15 +81,17 @@ def train(args, config, optimizer, optimizer_scale,
             torch.cuda.empty_cache()
 
         print('precomputation finished')
+
     print(f'* Epochs starting {epochs}')
     for epoch in range(epochs):
-        if epochs % 10 == 2:
+        if epochs % 2 == 0:
             print(f'    ** epochs {epoch} / {epochs} starting')
         avg_loss = 0
         count = 0
         optimizer.zero_grad()
         difflosslogger = 0
         optimizer_scale.zero_grad()
+
         for idx, data in enumerate(train_loader):
             if idx % 10 == 0:
                 print(f'Training batch {idx} / {len(train_loader)}')
@@ -106,7 +108,7 @@ def train(args, config, optimizer, optimizer_scale,
             if args.precompute_all:
                 weight, hfirst, outin = ws[idx].to(device), hs[idx], outs[idx].to(device)
             else:
-                print('* Overfitting one batch')
+                print(f'* Overfitting one batch of size {len(batch["input"])}')
                 weight, hfirst, outin = overfitting_batch_wrapper(
                     datatype=args.datatype,
                     bmodel=model, weight_name=weight_name,
