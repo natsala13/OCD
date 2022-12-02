@@ -84,7 +84,7 @@ def train(args, config, optimizer, optimizer_scale,
 
     print(f'* Epochs starting {epochs}')
     for epoch in range(epochs):
-        if epochs % 2 == 0:
+        if epochs % 1 == 0:
             print(f'    ** epochs {epoch} / {epochs} starting')
         avg_loss = 0
         count = 0
@@ -92,9 +92,13 @@ def train(args, config, optimizer, optimizer_scale,
         difflosslogger = 0
         optimizer_scale.zero_grad()
 
+        print(f'# Epoch {epoch} starting - {torch.cuda.memory_allocated()=}')
+
         for idx, data in enumerate(train_loader):
             if idx % 10 == 0:
                 print(f'Training batch {idx} / {len(train_loader)}')
+
+            print(f'# Training batch {idx} - {torch.cuda.memory_allocated()=}')
 
             optimizer_scale.zero_grad()
 
@@ -118,6 +122,8 @@ def train(args, config, optimizer, optimizer_scale,
                     lr=lr_overfitting,
                     verbose=False
                 )
+                del batch['input']
+                torch.cuda.empty_cache()
             print('* Overfitting one batch - Over')
             diff_weight = weight - dmodel_original_weight  # calculate optimal weight difference from baseline
             t = torch.randint(low=0, high=diffusion_num_steps, size=(1,)).to(device)  # Sample random timestamp
@@ -162,6 +168,7 @@ def train(args, config, optimizer, optimizer_scale,
             )
             optimizer_scale.step()
             optimizer_scale.zero_grad()
+
         if ((epoch + 1) % n_checkpoint == 0) or (epoch + 1 == epochs):
             print(
                 f'epoch {epoch + 1} save checkpoints: model_checkpoint_epoch{epoch}_step{step}_data{args.datatype}, scale_model_checkpoint_epoch{epoch}_loss{step}_data{args.datatype}')

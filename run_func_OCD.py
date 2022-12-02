@@ -74,6 +74,8 @@ torch.manual_seed(123456789)
 ##########################################################################################################
 ####################################### Parameters & Initializations #####################################
 ##########################################################################################################
+print(f'# Start - {torch.cuda.memory_allocated()=}')
+
 
 module_path = args.backbone_path  # path to desired pretrained model
 tb_path = args.tensorboard_path  # path to tensorboard log
@@ -84,13 +86,17 @@ lr = args.learning_rate  # learning rate for the diffusion model & scale estimat
 diffusion_model = DiffusionModel(config=config).to(device)
 # loss_fn = torch.nn.MSELoss()
 loss_fn = torch.nn.CrossEntropyLoss()
+print(f'# Diffusion model built - {torch.cuda.memory_allocated()=}')
 
 scale_model = Model_Scale(config=config).to(device)
+print(f'# Scale model built - {torch.cuda.memory_allocated()=}')
 if args.resume_training:
     diffusion_model.load_state_dict(torch.load(args.diffusion_model_path))
     scale_model.load_state_dict(torch.load(args.scale_model_path))
 
 train_loader, test_loader, model = wrapper_dataset(config, args, device)
+
+print(f'# Data loaders built - {torch.cuda.memory_allocated()=}')
 
 # model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))  # Load the pre-trained model.
 model = model.to(device)
@@ -134,6 +140,7 @@ print(padding)
 ########################################### Train Phase #########################################
 #################################################################################################
 print('* Train start')
+print(f'# Train Start - {torch.cuda.memory_allocated()=}')
 if args.train:
     diffusion_model, scale_model = train(args=args, config=config, optimizer=optimizer, optimizer_scale=optimizer_scale,
                                          device=device, diffusion_model=diffusion_model, scale_model=scale_model,
