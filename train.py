@@ -97,7 +97,7 @@ def train(args, config, optimizer, optimizer_scale,
                 print(f'Training batch {idx} / {len(train_loader)}')
             optimizer_scale.zero_grad()
             if args.datatype == 'cifar10':
-                train_x, train_label = batch[0], batch[3]
+                train_x, train_label = batch[0], batch[1]
                 batch = {'input': train_x.to(device), 'output': train_label.to(device)}
 
             # Overfitting encapsulation #

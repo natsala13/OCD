@@ -44,7 +44,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
 
     _eval_dset = SSL_Dataset(name='cifar10',
                              train=False,
-                             data_dir=config['spice']['data_train'],
+                             data_dir="./datasets/cifar10",
                              label_file=None,
                              all=True,
                              unlabeled=False)
@@ -53,7 +53,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     print(len(eval_dset))
 
     eval_loader = get_data_loader(eval_dset,
-                                  args.batch_size,
+                                  1,
                                   num_workers=1)
 
     return eval_loader, eval_loader, model

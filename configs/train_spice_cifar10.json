@@ -6,7 +6,7 @@
         "loss": "ce"
     },
     "model": {
-        "weight_name": "fc.weight",
+        "weight_name": "fc",
         "name":"spice"
     },
     "checkpoint": {
@@ -20,12 +20,12 @@
         "nch": 64,
         "out_ch": 1,
         "ch_mult": [1, 2, 2, 4],
-        "dim_in": 512,
+        "dim_in": 128,
         "dim_lat_out": 10,
         "dim_output": 10,
         "scale":{
             "ch": 32,
-            "in_dim": 512,
+            "in_dim": 128,
             "out_dim": 10
         }
 
@@ -68,7 +68,7 @@
                 }]
                   },
             "model_type": "moco_select",
-            "pretrained": "./models/self_model_cifar10.tar",
+            "pretrained": "./models/model_cifar10.pth",
             "head_id": 3,
             "freeze_conv": true
         },
