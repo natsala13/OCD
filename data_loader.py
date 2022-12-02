@@ -46,7 +46,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
                              train=False,
                              data_dir="./datasets/cifar10",
                              label_file=None,
-                             all=True,
+                             all=False,
                              unlabeled=False)
 
     eval_dset = _eval_dset.get_dset()
@@ -56,7 +56,9 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
                                   1,
                                   num_workers=1)
 
-    return eval_loader, eval_loader, model
+    train_loader, eval_loader, _ = torch.utils.data.random_split(eval_loader, [10, 10, 59980])
+
+    return train_loader, eval_loader, model
 
 
 def spice_model_build(config: ConfigWrapper, args, device):

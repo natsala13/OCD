@@ -33,13 +33,13 @@ def vgg_encode(x):
         return noise_model(x.unsqueeze(0).permute(0, 3, 1, 2).contiguous())
 
 
-def calc_score(model, eval_loader):
+def calc_score(model, train_loader):
     scores = []
     labels_pred = []
     labels_gt = []
 
     with torch.no_grad():
-        for image, target in eval_loader:
+        for _, (image, target) in enumerate(train_loader)[:50]:
             image = image.type(torch.FloatTensor).cuda()
             logit = model(image)
 
@@ -182,12 +182,6 @@ def train(args, config, optimizer, optimizer_scale,
                 optimizer.step()
                 ema_helper.update(diffusion_model)
                 optimizer.zero_grad()
-            ############################################################################
-            print('* Calculating Accuracy')
-
-            acc = calc_score(model, train_loader)
-            print(f'Acc - {acc}')
-            tb_logger.add_scalar("acc", acc)
 
             ############################################################################
 
@@ -196,6 +190,13 @@ def train(args, config, optimizer, optimizer_scale,
             )
             optimizer_scale.step()
             optimizer_scale.zero_grad()
+
+        ############################################################################
+        print('* Calculating Accuracy')
+
+        acc = calc_score(model, train_loader)
+        print(f'Acc - {acc}')
+        tb_logger.add_scalar("acc", acc)
 
         if ((epoch + 1) % n_checkpoint == 0) or (epoch + 1 == epochs):
             print(
