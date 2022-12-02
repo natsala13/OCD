@@ -183,6 +183,7 @@ def train(args, config, optimizer, optimizer_scale,
                 ema_helper.update(diffusion_model)
                 optimizer.zero_grad()
             ############################################################################
+            print('* Calculating Accuracy')
 
             acc = calc_score(model, train_loader)
             print(f'Acc - {acc}')
