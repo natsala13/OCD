@@ -52,7 +52,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     eval_dset = _eval_dset.get_dset()
     print(len(eval_dset))
 
-    train_ds, eval_ds, _ = torch.utils.data.random_split(eval_dset, [10, 10, 59980])
+    train_ds, eval_ds, _ = torch.utils.data.random_split(eval_dset, [10, 10, 49980])
 
     train_loader = get_data_loader(train_ds, 1, num_workers=1)
     eval_loader = get_data_loader(eval_ds, 1, num_workers=1)
