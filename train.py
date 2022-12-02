@@ -108,6 +108,9 @@ def train(args, config, optimizer, optimizer_scale,
 
             batch['input'] = batch['input'].to(device)
             batch['output'] = batch['output'].to(device)
+
+            print(f'# Batch {idx} to device - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
+
             # Overfitting encapsulation #
             if args.precompute_all:
                 weight, hfirst, outin = ws[idx].to(device), hs[idx], outs[idx].to(device)
@@ -124,10 +127,15 @@ def train(args, config, optimizer, optimizer_scale,
                 )
                 del batch['input']
                 torch.cuda.empty_cache()
+
+                print(f'# Emptying batch {idx} - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
+
             print('* Overfitting one batch - Over')
+
             diff_weight = weight - dmodel_original_weight  # calculate optimal weight difference from baseline
             t = torch.randint(low=0, high=diffusion_num_steps, size=(1,)).to(device)  # Sample random timestamp
             weight_noisy, error, sigma = noising(diff_weight, t)
+
             if args.datatype == 'tinynerf':
                 encoding_out = vgg_encode(outin)
             else:
@@ -139,7 +147,12 @@ def train(args, config, optimizer, optimizer_scale,
                 t.float()
             )
 
+            print(f'# Runned Diffusion model - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
+
             scale = scale_model(hfirst, encoding_out)  # estimate scale
+
+            print(f'# runned Scale model - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
+
             estimated_error = estimated_error[:, 0, padding[0][0]:padding[0][0] + mat_shape[0],
                               padding[1][0]:padding[1][0] + mat_shape[1]]  # remove padding
             ascale = diff_weight.view(-1).std()  # calculate optimal scale
@@ -152,8 +165,11 @@ def train(args, config, optimizer, optimizer_scale,
             count += 1
             lossdiff.backward()
             lscale.backward()
+
+            print(f'# Back prop on both models - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
             ############# Gradient accumulation for diffusion steps #################
             if ((idx + 1) % grad_accum == 0) or (idx + 1 == len(train_loader)):
+                print(f'* Running Gradient accumulation')
                 tb_logger.add_scalar("loss_diff", difflosslogger, global_step=step // grad_accum)
                 difflosslogger = 0
                 torch.nn.utils.clip_grad_norm_(
@@ -168,6 +184,8 @@ def train(args, config, optimizer, optimizer_scale,
             )
             optimizer_scale.step()
             optimizer_scale.zero_grad()
+
+            print(f'# Grad norm _ optimiser - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
         if ((epoch + 1) % n_checkpoint == 0) or (epoch + 1 == epochs):
             print(

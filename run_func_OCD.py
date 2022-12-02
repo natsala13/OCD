@@ -100,6 +100,7 @@ print(f'# Data loaders built - MEM - {(torch.cuda.memory_allocated() / 2 ** 20)}
 
 # model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))  # Load the pre-trained model.
 model = model.to(device)
+print(f'# Sim2sem 2 device - {(torch.cuda.memory_allocated() / 2 ** 20)} mb')
 
 if config.training.loss == 'mse':
     opt_error_loss = torch.nn.MSELoss()
