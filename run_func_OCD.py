@@ -185,3 +185,34 @@ for idx, (train_x, train_label) in enumerate(test_loader):
     print(
         f"\rBaseline loss {lbaseline / (idx + 1)}, Overfitted loss {lopt / (idx + 1)}, Diffusion loss {ldiff / (idx + 1)}",
         end='')
+
+################################################
+from tools.eval_semi import calculate_acc, calculate_ari, calculate_nmi
+
+acc = 0.0
+labels_pred = []
+labels_gt = []
+scores = []
+with torch.no_grad():
+    for image, target, _ in test_loader:
+        image = image.type(torch.FloatTensor).cuda()
+        logit, _ = model(image)
+
+        scores.append(logit.cpu().numpy())
+
+        labels_pred.append(torch.max(logit, dim=-1)[1].cpu().numpy())
+        labels_gt.append(target.cpu().numpy())
+
+scores = np.concatenate(scores, axis=0)
+labels_pred = np.concatenate(labels_pred, axis=0)
+labels_gt = np.concatenate(labels_gt, axis=0)
+try:
+    acc = calculate_acc(labels_pred, labels_gt)
+except:
+    acc = -1
+
+nmi = calculate_nmi(labels_pred, labels_gt)
+ari = calculate_ari(labels_pred, labels_gt)
+
+print(f"Test Accuracy: {acc}, NMI: {nmi}, ARI: {ari}")
+

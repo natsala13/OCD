@@ -33,20 +33,24 @@ def vgg_encode(x):
         return noise_model(x.unsqueeze(0).permute(0, 3, 1, 2).contiguous())
 
 
-def calc_score(model, train_loader):
+def calc_score(model, train_loader, stop_early=50):
     scores = []
     labels_pred = []
     labels_gt = []
 
     with torch.no_grad():
-        for _, (image, target) in enumerate(train_loader)[:50]:
+        for idx, (image, target, _) in enumerate(train_loader):
+            # image, target = batch[0], batch[1]
             image = image.type(torch.FloatTensor).cuda()
-            logit = model(image)
+            logit, _ = model(image)
 
             scores.append(logit.cpu().numpy())
 
             labels_pred.append(torch.max(logit, dim=-1)[1].cpu().numpy())
             labels_gt.append(target.cpu().numpy())
+
+            if stop_early and idx > stop_early:
+                break
 
     labels_pred = np.concatenate(labels_pred, axis=0)
     labels_gt = np.concatenate(labels_gt, axis=0)
