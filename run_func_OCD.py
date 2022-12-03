@@ -195,7 +195,7 @@ for train_x, train_label, _ in test_loader:
     lbaseline += lbase
 
     predicted_labels += [label_predicted]
-    gt_labels += batch['output'].cpu().numpy()
+    gt_labels += [batch['output'].cpu().numpy()]
 
     print(
         f"\rBaseline loss {lbaseline / (idx + 1)}, Overfitted loss {lopt / (idx + 1)}, Diffusion loss {ldiff / (idx + 1)}",
