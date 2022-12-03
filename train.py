@@ -39,8 +39,9 @@ def calc_score(model, train_loader, stop_early=10):
     labels_gt = []
 
     with torch.no_grad():
-        for idx, (image, target, _) in enumerate(train_loader):
-            # image, target = batch[0], batch[1]
+        idx = -1
+        for image, target, _ in train_loader:
+            idx += 1
             image = image.type(torch.FloatTensor).cuda()
             logit, _ = model(image)
 
@@ -125,7 +126,9 @@ def train(args, config, optimizer, optimizer_scale,
         difflosslogger = 0
         optimizer_scale.zero_grad()
 
-        for idx, batch in enumerate(train_loader):
+        idx = -1
+        for batch in train_loader:
+            idx += 1
             if idx % 10 == 0:
                 print(f'Training batch {idx} / {len(train_loader)}')
             optimizer_scale.zero_grad()
