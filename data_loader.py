@@ -20,7 +20,6 @@ from fixmatch.models.nets.wrn import WideResNet
 from fixmatch.datasets.ssl_dataset_robust import SSL_Dataset
 from fixmatch.datasets.data_utils import get_data_loader
 
-
 WIDERESNET_DEPTH = 28
 WIDERESNET_WIDDEN = 2
 WIDERESNET_LEAKY_SLOPE = 0.1
@@ -44,11 +43,11 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     model.eval()
 
     _train_dset = SSL_Dataset(name='cifar10',
-                             train=True,
-                             data_dir="./datasets/cifar10",
-                             label_file=None,
-                             all=False,
-                             unlabeled=False)
+                              train=True,
+                              data_dir="./datasets/cifar10",
+                              label_file=None,
+                              all=False,
+                              unlabeled=False)
 
     _eval_dset = SSL_Dataset(name='cifar10',
                              train=False,
@@ -57,14 +56,14 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
                              all=False,
                              unlabeled=False)
 
-    eval_dset = _eval_dset.get_dset()
     train_dset = _train_dset.get_dset()
-    print(len(eval_dset))
+    eval_dset = _eval_dset.get_dset()
 
-    train_ds, _ = torch.utils.data.random_split(train_dset, [20, 9980])
+    train_ds, _ = torch.utils.data.random_split(train_dset, [20, 49880])
+    test_ds, _ = torch.utils.data.random_split(eval_dset, [1000, 9000])
 
     train_loader = get_data_loader(train_ds, 1, num_workers=1)
-    eval_loader = get_data_loader(eval_dset, 100, num_workers=1)
+    eval_loader = get_data_loader(test_ds, 1, num_workers=1)
 
     return train_loader, eval_loader, model
 
