@@ -158,8 +158,6 @@ idx = 0
 for train_x, train_label, _ in test_loader:
     batch = {'input': train_x.to(device), 'output': train_label.to(device)}
 
-    import ipdb;ipdb.set_trace()
-
     # Overfitting encapsulation #
     weight, hfirst, outin = overfitting_batch_wrapper(
         datatype=args.datatype,

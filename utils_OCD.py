@@ -197,8 +197,6 @@ def check_ps_nerf(named_parameter='', bmodel=None, w=0,
 
 def check_ps(named_parameter='', bmodel=None, w=0,
              batch=None, loss_fn=None, std=0, dopt=0):
-    import ipdb;ipdb.set_trace()
-
     model = copy.deepcopy(bmodel)
     r = copy.deepcopy(model.get_parameter(named_parameter + '.weight').data)
     predicted_labels, h = model(batch['input'])
