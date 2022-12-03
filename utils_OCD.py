@@ -6,7 +6,7 @@ from nerf_utils.tiny_nerf import run_one_iter_of_tinynerf
 from nerf_utils.nerf import cumprod_exclusive, get_minibatches, get_ray_bundle, positional_encoding
 from nerf_utils.tiny_nerf import VeryTinyNerfModel
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 betas = torch.linspace(1e-6, 1e-2, 1000).to(device)
 
@@ -174,7 +174,7 @@ def check_ps_nerf(named_parameter='', bmodel=None, w=0,
     )
     loss = loss_fn(rgb_predicted, batch['output'])
     loptimal = loss.item()
-    model.get_parameter(named_parameter + '.weight').data = r + std * w.squeeze().to('cuda')
+    model.get_parameter(named_parameter + '.weight').data = r + std * w.squeeze().to(device)
     rgb_predicted, h = run_one_iter_of_tinynerf(
         batch['height'],
         batch['width'],
@@ -208,7 +208,7 @@ def check_ps(named_parameter='', bmodel=None, w=0,
     loss = loss_fn(predicted_labels, batch['output'].long())
     loptimal = loss.item()
 
-    model.get_parameter(named_parameter + '.weight').data = r + std * w.squeeze().to('cuda')
+    model.get_parameter(named_parameter + '.weight').data = r + std * w.squeeze().to(device)
     predicted_labels, h = model(batch['input'])
     loss = loss_fn(predicted_labels, batch['output'].long())
     ldiffusion = loss.item()
@@ -266,7 +266,7 @@ def generalized_steps(named_parameter, numstep, x, model, bmodel, batch, loss_fn
             next_t = (torch.ones(n) * j).to(x.device)
             at = compute_alpha(b, t.long())
             at_next = compute_alpha(b, next_t.long())
-            xt = xs[-1].to('cuda')
+            xt = xs[-1].to(device)
             et = model(F.pad(xt, (padding[1][0], padding[1][1], padding[0][0], padding[0][1])), h, outin, t.float())
             et = et[:, 0, padding[0][0]:padding[0][0] + mat_shape[0], padding[1][0]:padding[1][0] + mat_shape[1]]
             x0_t = (xt - et * (1 - at).sqrt()) / at.sqrt()

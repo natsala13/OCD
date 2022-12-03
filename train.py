@@ -11,7 +11,7 @@ import numpy as np
 
 from tools.eval_semi import calculate_acc, calculate_nmi, calculate_ari
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
 
 
 class NoiseModel(nn.Module):
@@ -42,7 +42,7 @@ def calc_score(model, train_loader, stop_early=10):
         idx = -1
         for image, target, _ in train_loader:
             idx += 1
-            image = image.type(torch.FloatTensor).cuda()
+            image = image.type(torch.FloatTensor).to(device)
             logit, _ = model(image)
 
             scores.append(logit.cpu().numpy())

@@ -80,7 +80,7 @@ torch.manual_seed(123456789)
 module_path = args.backbone_path  # path to desired pretrained model
 tb_path = args.tensorboard_path  # path to tensorboard log
 tb_logger = tb.SummaryWriter(log_dir=tb_path)
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
 lr = args.learning_rate  # learning rate for the diffusion model & scale estimation model
 
 diffusion_model = DiffusionModel(config=config).to(device)
