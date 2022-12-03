@@ -156,7 +156,7 @@ else:
 
 print('*' * 100)
 ldiff, lopt, lbaseline = 0, 0, 0
-for idx, (train_x, train_label) in enumerate(test_loader):
+for idx, (train_x, train_label, _) in enumerate(test_loader):
     batch = {'input': train_x.to(device), 'output': train_label.to(device)}
 
     # Overfitting encapsulation #

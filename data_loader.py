@@ -43,6 +43,13 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     model = model.to(device)
     model.eval()
 
+    _train_dset = SSL_Dataset(name='cifar10',
+                             train=True,
+                             data_dir="./datasets/cifar10",
+                             label_file=None,
+                             all=False,
+                             unlabeled=False)
+
     _eval_dset = SSL_Dataset(name='cifar10',
                              train=False,
                              data_dir="./datasets/cifar10",
@@ -51,12 +58,13 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
                              unlabeled=False)
 
     eval_dset = _eval_dset.get_dset()
+    train_dset = _train_dset.get_dset()
     print(len(eval_dset))
 
-    train_ds, eval_ds = torch.utils.data.random_split(eval_dset, [10, 9990])
+    train_ds, _ = torch.utils.data.random_split(train_dset, [20, 9980])
 
     train_loader = get_data_loader(train_ds, 1, num_workers=1)
-    eval_loader = get_data_loader(eval_ds, 100, num_workers=1)
+    eval_loader = get_data_loader(eval_dset, 100, num_workers=1)
 
     return train_loader, eval_loader, model
 
