@@ -191,7 +191,7 @@ for idx, (train_x, train_label, _) in enumerate(test_loader):
         end='')
 
 ################################################
-acc = calc_score(model, test_loader)
-print(f'Baseline acc - {acc}')
+# acc = calc_score(model, test_loader)
+# print(f'Baseline acc - {acc}')
 # print(f"Test Accuracy: {acc}, NMI: {nmi}, ARI: {ari}")
 

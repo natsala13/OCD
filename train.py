@@ -199,11 +199,11 @@ def train(args, config, optimizer, optimizer_scale,
             optimizer_scale.zero_grad()
 
         ############################################################################
-        print('* Calculating Accuracy')
-
-        acc = calc_score(model, test_loader)
-        print(f'Acc - {acc}')
-        tb_logger.add_scalar("acc", acc)
+        # print('* Calculating Accuracy')
+        #
+        # acc = calc_score(model, test_loader)
+        # print(f'Acc - {acc}')
+        # tb_logger.add_scalar("acc", acc)
 
         if ((epoch + 1) % n_checkpoint == 0) or (epoch + 1 == epochs):
             print(
