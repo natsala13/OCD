@@ -145,7 +145,7 @@ if args.train:
                                          device=device, diffusion_model=diffusion_model, scale_model=scale_model,
                                          model=model, train_loader=train_loader, padding=padding, mat_shape=mat_shape,
                                          ema_helper=ema_helper, tb_logger=tb_logger, loss_fn=loss_fn,
-                                         opt_error_loss=opt_error_loss)
+                                         opt_error_loss=opt_error_loss, test_loader=test_loader)
 else:
     diffusion_model.load_my_state_dict(torch.load(args.diffusion_model_path, map_location=device))
     scale_model.load_my_state_dict(torch.load(args.scale_model_path, map_location=device))

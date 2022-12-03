@@ -10,7 +10,7 @@
         "name":"spice"
     },
     "checkpoint": {
-        "checkpoint_path": "",
+        "checkpoint_path": "./checkpoints/",
         "n_checkpoint": 1
     },
     "diffusion": {
