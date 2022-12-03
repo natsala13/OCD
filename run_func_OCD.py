@@ -156,7 +156,8 @@ else:
 
 print('*' * 100)
 ldiff, lopt, lbaseline = 0, 0, 0
-for idx, (train_x, train_label, _) in enumerate(test_loader):
+idx = 0
+for train_x, train_label, _ in test_loader:
     batch = {'input': train_x.to(device), 'output': train_label.to(device)}
 
     # Overfitting encapsulation #
@@ -189,6 +190,10 @@ for idx, (train_x, train_label, _) in enumerate(test_loader):
     print(
         f"\rBaseline loss {lbaseline / (idx + 1)}, Overfitted loss {lopt / (idx + 1)}, Diffusion loss {ldiff / (idx + 1)}",
         end='')
+
+    idx += 1
+    del batch['input']
+    torch.cuda.empty_cache()
 
 ################################################
 # acc = calc_score(model, test_loader)
