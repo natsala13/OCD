@@ -197,15 +197,19 @@ def check_ps_nerf(named_parameter='', bmodel=None, w=0,
 
 def check_ps(named_parameter='', bmodel=None, w=0,
              batch=None, loss_fn=None, std=0, dopt=0):
+    import ipdb;ipdb.set_trace()
+
     model = copy.deepcopy(bmodel)
     r = copy.deepcopy(model.get_parameter(named_parameter + '.weight').data)
     predicted_labels, h = model(batch['input'])
     loss = loss_fn(predicted_labels, batch['output'].long())
     lbase = loss.item()
+
     model.get_parameter(named_parameter + '.weight').data += dopt.squeeze()
     predicted_labels, h = model(batch['input'])
     loss = loss_fn(predicted_labels, batch['output'].long())
     loptimal = loss.item()
+
     model.get_parameter(named_parameter + '.weight').data = r + std * w.squeeze().to('cuda')
     predicted_labels, h = model(batch['input'])
     loss = loss_fn(predicted_labels, batch['output'].long())
@@ -275,6 +279,7 @@ def generalized_steps(named_parameter, numstep, x, model, bmodel, batch, loss_fn
             c2 = ((1 - at_next) - c1 ** 2).sqrt()
             xt_next = at_next.sqrt() * x0_t + c1 * torch.randn_like(x) + c2 * et
             xs.append(xt_next.to('cpu'))
+
         wdiff = xs[-1]
         ldiffusion, loptimal, lbase = check_ps_wrapper(isnerf=isnerf, named_parameter=named_parameter,
                                                        bmodel=bmodel, w=wdiff.squeeze(), batch=batch,

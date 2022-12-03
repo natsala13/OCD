@@ -158,6 +158,8 @@ idx = 0
 for train_x, train_label, _ in test_loader:
     batch = {'input': train_x.to(device), 'output': train_label.to(device)}
 
+    import ipdb;ipdb.set_trace()
+
     # Overfitting encapsulation #
     weight, hfirst, outin = overfitting_batch_wrapper(
         datatype=args.datatype,
@@ -173,8 +175,10 @@ for train_x, train_label, _ in test_loader:
         encoding_out = vgg_encode(outin)
     else:
         encoding_out = outin
+
     with torch.no_grad():
         std = scale_model(hfirst, encoding_out)
+
     ldiffusion, loptimal, lbase, wdiff = generalized_steps(
         named_parameter=weight_name, numstep=config.diffusion.diffusion_num_steps_eval,
         x=(diff_weight.unsqueeze(0), hfirst, encoding_out), model=diffusion_model,
@@ -182,6 +186,7 @@ for train_x, train_label, _ in test_loader:
         std=std, padding=padding,
         mat_shape=mat_shape, isnerf=(args.datatype == 'tinynerf')
     )
+
     ldiff += ldiffusion
     lopt += loptimal
     lbaseline += lbase
