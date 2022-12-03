@@ -187,7 +187,7 @@ def train(args, config, optimizer, optimizer_scale,
 
             ############# Gradient accumulation for diffusion steps #################
             if ((idx + 1) % grad_accum == 0) or (idx + 1 == len(train_loader)):
-                print(f'* Running Gradient accumulation')
+                print(f'* Scale loss - {lscale.item()}, Diffusion loss - {difflosslogger}')
                 tb_logger.add_scalar("loss_diff", difflosslogger, global_step=step // grad_accum)
                 difflosslogger = 0
                 torch.nn.utils.clip_grad_norm_(
@@ -206,11 +206,6 @@ def train(args, config, optimizer, optimizer_scale,
             optimizer_scale.zero_grad()
 
         ############################################################################
-        # print('* Calculating Accuracy')
-        #
-        # acc = calc_score(model, test_loader)
-        # print(f'Acc - {acc}')
-        # tb_logger.add_scalar("acc", acc)
 
         if ((epoch + 1) % n_checkpoint == 0) or (epoch + 1 == epochs):
             print(
@@ -218,6 +213,6 @@ def train(args, config, optimizer, optimizer_scale,
             torch.save(ema_helper.state_dict(),
                        checkpoint_path + f'model_checkpoint_epoch{epoch}_step{step}_data{args.datatype}.pt')
             torch.save(scale_model.state_dict(),
-                       checkpoint_path + f'scale_model_checkpoint_epoch{epoch}_loss{step}_data{args.datatype}.pt')
+                       checkpoint_path + f'scale_model_checkpoint_epoch{epoch}_loss{difflosslogger}_data{args.datatype}.pt')
 
     return diffusion_model, scale_model
