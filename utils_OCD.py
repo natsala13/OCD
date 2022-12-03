@@ -212,8 +212,11 @@ def check_ps(named_parameter='', bmodel=None, w=0,
     predicted_labels, h = model(batch['input'])
     loss = loss_fn(predicted_labels, batch['output'].long())
     ldiffusion = loss.item()
+
+    label_predicted = torch.max(predicted_labels, dim=-1)[1].cpu().numpy()
+
     del model
-    return ldiffusion, loptimal, lbase
+    return ldiffusion, loptimal, lbase, label_predicted
 
 
 def check_ps_wrapper(isnerf=0, named_parameter='', bmodel=None, w=0,
@@ -279,8 +282,8 @@ def generalized_steps(named_parameter, numstep, x, model, bmodel, batch, loss_fn
             xs.append(xt_next.to('cpu'))
 
         wdiff = xs[-1]
-        ldiffusion, loptimal, lbase = check_ps_wrapper(isnerf=isnerf, named_parameter=named_parameter,
+        ldiffusion, loptimal, lbase, label_predicted = check_ps_wrapper(isnerf=isnerf, named_parameter=named_parameter,
                                                        bmodel=bmodel, w=wdiff.squeeze(), batch=batch,
                                                        loss_fn=loss_fn, std=std, dopt=dopt
                                                        )
-    return ldiffusion, loptimal, lbase, wdiff
+    return ldiffusion, loptimal, lbase, wdiff, label_predicted

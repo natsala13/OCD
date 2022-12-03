@@ -20,6 +20,8 @@ from attrdict import AttrDict
 
 
 from train import calc_score
+from tools.eval_semi import calculate_acc
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -155,6 +157,9 @@ else:
 print('*' * 100)
 ldiff, lopt, lbaseline = 0, 0, 0
 idx = 0
+predicted_labels = []
+gt_labels = []
+
 for train_x, train_label, _ in test_loader:
     batch = {'input': train_x.to(device), 'output': train_label.to(device)}
 
@@ -177,7 +182,7 @@ for train_x, train_label, _ in test_loader:
     with torch.no_grad():
         std = scale_model(hfirst, encoding_out)
 
-    ldiffusion, loptimal, lbase, wdiff = generalized_steps(
+    ldiffusion, loptimal, lbase, wdiff, label_predicted = generalized_steps(
         named_parameter=weight_name, numstep=config.diffusion.diffusion_num_steps_eval,
         x=(diff_weight.unsqueeze(0), hfirst, encoding_out), model=diffusion_model,
         bmodel=model, batch=batch, loss_fn=opt_error_loss,
@@ -188,6 +193,10 @@ for train_x, train_label, _ in test_loader:
     ldiff += ldiffusion
     lopt += loptimal
     lbaseline += lbase
+
+    predicted_labels += [label_predicted]
+    gt_labels += batch['output'].cpu().numpy()
+
     print(
         f"\rBaseline loss {lbaseline / (idx + 1)}, Overfitted loss {lopt / (idx + 1)}, Diffusion loss {ldiff / (idx + 1)}",
         end='')
@@ -196,6 +205,7 @@ for train_x, train_label, _ in test_loader:
     del batch['input']
     torch.cuda.empty_cache()
 
+acc = calculate_acc(predicted_labels, gt_labels)
 ################################################
 # acc = calc_score(model, test_loader)
 # print(f'Baseline acc - {acc}')
