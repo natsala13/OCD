@@ -127,10 +127,14 @@ def train(args, config, optimizer, optimizer_scale,
         optimizer_scale.zero_grad()
 
         idx = -1
-        for batch in train_loader:
+        my_iterator = iter(train_loader)
+        # for batch in train_loader:
+        while (batch := next(my_iterator, None)) is not None:
             idx += 1
+            # batch = next(my_iterator)
+
             if idx % 10 == 0:
-                print(f'Training batch {idx} / {len(train_loader)}')
+                print(f'* Training batch {idx} / {len(train_loader)}')
             optimizer_scale.zero_grad()
             if args.datatype == 'cifar10':
                 train_x, train_label = batch[0], batch[1]
