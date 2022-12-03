@@ -41,6 +41,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     state_dict = {k.replace('module.', '', 1): checkpoint['eval_model'][k] for k in checkpoint['eval_model']}
     model.load_state_dict(state_dict)
     model = model.to(device)
+    model.eval()
 
     _eval_dset = SSL_Dataset(name='cifar10',
                              train=False,
@@ -52,7 +53,7 @@ def build_model_for_cifar10(config: ConfigWrapper, args, device):
     eval_dset = _eval_dset.get_dset()
     print(len(eval_dset))
 
-    train_ds, eval_ds, _ = torch.utils.data.random_split(eval_dset, [10, 10, 9980])
+    train_ds, eval_ds = torch.utils.data.random_split(eval_dset, [10, 9990])
 
     train_loader = get_data_loader(train_ds, 1, num_workers=1)
     eval_loader = get_data_loader(eval_ds, 100, num_workers=1)
