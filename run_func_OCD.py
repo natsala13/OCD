@@ -19,6 +19,8 @@ from data_loader import wrapper_dataset
 from attrdict import AttrDict
 
 
+from train import calc_score
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     '-e', '--eval', type=int, default=0,
@@ -92,6 +94,8 @@ if args.resume_training:
 
 train_loader, test_loader, model = wrapper_dataset(config, args, device)
 
+acc = calc_score(model, test_loader)
+print(f'Baseline acc - {acc}')
 
 # model.load_state_dict(torch.load(module_path, map_location=torch.device(device)))  # Load the pre-trained model.
 model = model.to(device)
@@ -187,32 +191,7 @@ for idx, (train_x, train_label) in enumerate(test_loader):
         end='')
 
 ################################################
-from tools.eval_semi import calculate_acc, calculate_ari, calculate_nmi
-
-acc = 0.0
-labels_pred = []
-labels_gt = []
-scores = []
-with torch.no_grad():
-    for image, target, _ in test_loader:
-        image = image.type(torch.FloatTensor).cuda()
-        logit, _ = model(image)
-
-        scores.append(logit.cpu().numpy())
-
-        labels_pred.append(torch.max(logit, dim=-1)[1].cpu().numpy())
-        labels_gt.append(target.cpu().numpy())
-
-scores = np.concatenate(scores, axis=0)
-labels_pred = np.concatenate(labels_pred, axis=0)
-labels_gt = np.concatenate(labels_gt, axis=0)
-try:
-    acc = calculate_acc(labels_pred, labels_gt)
-except:
-    acc = -1
-
-nmi = calculate_nmi(labels_pred, labels_gt)
-ari = calculate_ari(labels_pred, labels_gt)
-
-print(f"Test Accuracy: {acc}, NMI: {nmi}, ARI: {ari}")
+acc = calc_score(model, test_loader)
+print(f'Baseline acc - {acc}')
+# print(f"Test Accuracy: {acc}, NMI: {nmi}, ARI: {ari}")
 

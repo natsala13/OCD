@@ -9,7 +9,7 @@ import torchvision
 import torch.nn as nn
 import numpy as np
 
-from tools.eval_semi import calculate_acc
+from tools.eval_semi import calculate_acc, calculate_nmi, calculate_ari
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -33,7 +33,7 @@ def vgg_encode(x):
         return noise_model(x.unsqueeze(0).permute(0, 3, 1, 2).contiguous())
 
 
-def calc_score(model, train_loader, stop_early=50):
+def calc_score(model, train_loader, stop_early=10):
     scores = []
     labels_pred = []
     labels_gt = []
@@ -59,6 +59,9 @@ def calc_score(model, train_loader, stop_early=50):
     except:
         acc = -1
 
+    nmi = calculate_nmi(labels_pred, labels_gt)
+    ari = calculate_ari(labels_pred, labels_gt)
+
     return acc
 
 
@@ -66,7 +69,7 @@ def train(args, config, optimizer, optimizer_scale,
           device, diffusion_model, scale_model,
           model, train_loader, padding, mat_shape,
           ema_helper, tb_logger, loss_fn,
-          opt_error_loss):
+          opt_error_loss, test_loader=None):
     """
     model: pretrained model of final problem (Lenet5 or Tinynerf).
     """
@@ -198,7 +201,7 @@ def train(args, config, optimizer, optimizer_scale,
         ############################################################################
         print('* Calculating Accuracy')
 
-        acc = calc_score(model, train_loader)
+        acc = calc_score(model, test_loader)
         print(f'Acc - {acc}')
         tb_logger.add_scalar("acc", acc)
 
