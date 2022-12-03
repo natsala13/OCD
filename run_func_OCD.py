@@ -86,8 +86,8 @@ device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
 lr = args.learning_rate  # learning rate for the diffusion model & scale estimation model
 
 diffusion_model = DiffusionModel(config=config).to(device)
-# loss_fn = torch.nn.MSELoss()
-loss_fn = torch.nn.CrossEntropyLoss()
+loss_fn = torch.nn.MSELoss()
+# loss_fn = torch.nn.CrossEntropyLoss()
 
 scale_model = Model_Scale(config=config).to(device)
 if args.resume_training:
@@ -206,6 +206,9 @@ for train_x, train_label, _ in test_loader:
     torch.cuda.empty_cache()
 
 acc = calculate_acc(predicted_labels, gt_labels)
+print('*************************')
+print(f'Acc - {acc}')
+
 ################################################
 # acc = calc_score(model, test_loader)
 # print(f'Baseline acc - {acc}')
