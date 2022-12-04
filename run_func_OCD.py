@@ -108,7 +108,7 @@ elif config.training.loss == 'own':
     # Change according to desired objective
     pass
 optimizer = torch.optim.Adam(diffusion_model.parameters(), lr=lr)
-optimizer_scale = torch.optim.Adam(scale_model.parameters(), lr=5 * lr)
+optimizer_scale = torch.optim.Adam(scale_model.parameters(), lr=2 * lr)
 ema_helper = EMAHelper(mu=0.9999)
 ema_helper.register(diffusion_model)
 
