@@ -10,8 +10,6 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import ToTensor
 from copy import deepcopy
 
-import attrdict
-from pathlib import Path
 from utils_OCD import ConfigWrapper
 
 from spice.model.sim2sem import Sim2Sem

@@ -16,11 +16,10 @@ import os
 import argparse
 import json
 from data_loader import wrapper_dataset
-from attrdict import AttrDict
 
 
 from train import calc_score
-from tools.eval_semi import calculate_acc
+from tools.eval_semi import calculate_acc, calculate_nmi, calculate_ari
 
 
 parser = argparse.ArgumentParser()
@@ -72,7 +71,7 @@ print(args)
 with open(args.config_path) as f:
     config = ConfigWrapper(**json.load(f))
 
-config = AttrDict(config)
+# config = AttrDict(config)
 torch.manual_seed(123456789)
 
 ##########################################################################################################
@@ -206,8 +205,10 @@ for train_x, train_label, _ in test_loader:
     torch.cuda.empty_cache()
 
 acc = calculate_acc(predicted_labels, gt_labels)
+nmi = calculate_nmi(predicted_labels, gt_labels)
+ari = calculate_ari(predicted_labels, gt_labels)
 print('*************************')
-print(f'Acc - {acc}')
+print(f'Acc - {acc}, NMI - {nmi}, ARI - {ari}')
 
 ################################################
 # acc = calc_score(model, test_loader)
