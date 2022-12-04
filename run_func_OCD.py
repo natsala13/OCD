@@ -204,14 +204,14 @@ for train_x, train_label, _ in test_loader:
     del batch['input']
     torch.cuda.empty_cache()
 
+predicted_labels = np.concatenate(predicted_labels, axis=0)
+gt_labels = np.concatenate(gt_labels, axis=0)
+
 acc = calculate_acc(predicted_labels, gt_labels)
 nmi = calculate_nmi(predicted_labels, gt_labels)
 ari = calculate_ari(predicted_labels, gt_labels)
 print('*************************')
 print(f'Acc - {acc}, NMI - {nmi}, ARI - {ari}')
 
-################################################
-# acc = calc_score(model, test_loader)
-# print(f'Baseline acc - {acc}')
-# print(f"Test Accuracy: {acc}, NMI: {nmi}, ARI: {ari}")
+
 
