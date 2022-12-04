@@ -90,7 +90,7 @@ def train(args, config, optimizer, optimizer_scale,
         print('precomputation of overfitting to save time starts')
         ws, hs, outs = [], [], []
         for idx, batch in enumerate(train_loader):
-            print(f'Trianing batch {idx} / 100...')
+            print(f'Trianing batch {idx} / {len(train_loader)}...')
             optimizer_scale.zero_grad()
 
             if args.datatype == 'cifar10':
